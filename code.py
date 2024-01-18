@@ -1,4 +1,5 @@
 import pygame
+from pygame.math import Vector2
 
 if __name__ == '__main__':
     pygame.init()
@@ -7,59 +8,93 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
     screen.fill('black')
     clock = pygame.time.Clock()
+    tank_image = pygame.image.load('images/tank.png')
 
     FPS = 60
     TILE = 32
-    DIRECTS = [[0, -1], [1, 0], [0, 1], [-1, 0]]
 
 
     class Tank:
-        def __init__(self, color, px, py, direct, keyList):
+        def __init__(self, color, px, py, angle):
+            pos = (px, py)
             objects.append(self)
             self.type = 'tank'
+            self.image = pygame.transform.rotate(tank_image, -angle)
+            self.original_image = self.image
 
             self.color = color
-            self.rect = pygame.Rect(px, py, TILE, TILE)
-            self.direct = direct
-            self.moveSpeed = 2
-
-            self.keyLEFT = keyList[0]
-            self.keyRIGHT = keyList[1]
-            self.keyUP = keyList[2]
-            self.keyDOWN = keyList[3]
-            self.keySHOT = keyList[4]
+            self.rect = self.image.get_rect(center=pos)
+            self.position = Vector2(pos)
+            self.direction = Vector2(-1, 0)
+            self.speed = 0
+            self.angle_speed = 0
+            self.angle = 0
 
         def update(self):
-            if keys[self.keyLEFT]:
-                self.rect.x -= self.moveSpeed
-                self.direct = 3
-            elif keys[self.keyRIGHT]:
-                self.rect.x += self.moveSpeed
-                self.direct = 1
-            elif keys[self.keyUP]:
-                self.rect.y -= self.moveSpeed
-                self.direct = 0
-            elif keys[self.keyDOWN]:
-                self.rect.y += self.moveSpeed
-                self.direct = 2
+            old_position = self.position
+            if self.angle_speed != 0:
+                # Rotate the direction vector and then the image.
+                self.direction.rotate_ip(self.angle_speed)
+                self.angle += self.angle_speed
+                self.image = pygame.transform.rotate(self.original_image, -self.angle)
+                self.rect = self.image.get_rect(center=self.rect.center)
+            # Update the position vector and the rect.
+            self.position += self.direction * self.speed
+            self.rect.center = self.position
+
+            for obj in objects:
+                if obj != self and obj.type == 'block' and self.rect.colliderect(obj.rect):
+                    self.rect.center = old_position
 
         def draw(self):
-            pygame.draw.rect(screen, self.color, self.rect)
-
-            x = self.rect.centerx + DIRECTS[self.direct][0] * 30
-            y = self.rect.centery + DIRECTS[self.direct][1] * 30
-            pygame.draw.line(screen, 'white', self.rect.center, (x, y), 4)
+            screen.blit(self.image, self.rect)
 
 
     objects = []
-    Tank('blue', 100, 275, 0, (pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s, pygame.K_SPACE))
-    Tank('red', 650, 275, 0, (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_KP_ENTER))
+    player1 = Tank('blue', 100, 275, 90)
+    player2 = Tank('red', 650, 275, -90)
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        keys = pygame.key.get_pressed()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    player1.speed = 1
+                elif event.key == pygame.K_s:
+                    player1.speed = -1
+                elif event.key == pygame.K_a:
+                    player1.angle_speed = -4
+                elif event.key == pygame.K_d:
+                    player1.angle_speed = 4
+
+                if event.key == pygame.K_UP:
+                    player2.speed = 1
+                elif event.key == pygame.K_DOWN:
+                    player2.speed = -1
+                elif event.key == pygame.K_LEFT:
+                    player2.angle_speed = -4
+                elif event.key == pygame.K_RIGHT:
+                    player2.angle_speed = 4
+
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    player1.speed = 0
+                elif event.key == pygame.K_s:
+                    player1.speed = 0
+                elif event.key == pygame.K_a:
+                    player1.angle_speed = 0
+                elif event.key == pygame.K_d:
+                    player1.angle_speed = 0
+
+                if event.key == pygame.K_LEFT:
+                    player2.angle_speed = 0
+                elif event.key == pygame.K_RIGHT:
+                    player2.angle_speed = 0
+                elif event.key == pygame.K_UP:
+                    player2.speed = 0
+                elif event.key == pygame.K_DOWN:
+                    player2.speed = 0
 
         for obj in objects:
             obj.update()
