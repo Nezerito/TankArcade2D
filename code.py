@@ -102,6 +102,24 @@ if __name__ == '__main__':
             pygame.display.update()
 
 
+    def pause():
+        paused = True
+        message_to_screen("Paused", 'white', -100)
+        message_to_screen("Press C to continue playing or Q to quit", 'green', 25)
+        pygame.display.update()
+        while paused:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        paused = False
+                    elif event.key == pygame.K_q:
+                        pygame.quit()
+                        quit()
+
+
     class Tank:
         def __init__(self, color, px, py, angle, vector):
             self.color = color
@@ -292,6 +310,8 @@ if __name__ == '__main__':
                     player2.speed = 0
                 elif event.key == pygame.K_DOWN:
                     player2.speed = 0
+                if event.key == pygame.K_ESCAPE:
+                    pause()
         screen.fill('black')
         for obj in objects:
             obj.update()
