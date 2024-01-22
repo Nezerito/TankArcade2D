@@ -17,6 +17,11 @@ if __name__ == '__main__':
     bullet_image = pygame.image.load('images/bullet.png')
     brick_image = pygame.image.load('images/block_brick.png')
     bullet_image = pygame.transform.scale(bullet_image, (10, 15))
+    bangs_images = [
+        pygame.image.load('images/bang1.png'),
+        pygame.image.load('images/bang2.png'),
+        pygame.image.load('images/bang3.png'),
+    ]
     small_font = pygame.font.SysFont("comicsansms", 25)
     medium_font = pygame.font.SysFont("comicsansms", 50)
     large_font = pygame.font.SysFont("Yu Mincho Demibold", 85)
@@ -195,9 +200,10 @@ if __name__ == '__main__':
                 bullets.remove(self)
             else:
                 for obj in objects:
-                    if obj != self.parent and obj.rect.collidepoint(self.position):
+                    if obj != self.parent and obj.type != 'bang' and obj.rect.collidepoint(self.position):
                         obj.damage(self.damage)
                         bullets.remove(self)
+                        Bang(self.position)
                         break
 
         def draw(self):
@@ -241,6 +247,25 @@ if __name__ == '__main__':
                     rect = text.get_rect(center=(5 + i * 70 + 32, 5 + 11))
                     screen.blit(text, rect)
                     i += 1
+
+
+    class Bang:
+        def __init__(self, pos):
+            objects.append(self)
+            self.type = 'bang'
+
+            self.position = pos
+            self.frame = 0
+
+        def update(self):
+            self.frame += 0.2
+            if self.frame >= 3:
+                objects.remove(self)
+
+        def draw(self):
+            image = bangs_images[int(self.frame)]
+            rect = image.get_rect(center=self.position)
+            screen.blit(image, rect)
 
 
     bullets = []
