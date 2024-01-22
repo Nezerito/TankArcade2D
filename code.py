@@ -1,5 +1,6 @@
 import pygame
 from pygame.math import Vector2
+from random import randint
 
 if __name__ == '__main__':
     pygame.init()
@@ -13,87 +14,90 @@ if __name__ == '__main__':
 
     tank_image = pygame.image.load('images/tank.png')
     bullet_image = pygame.image.load('images/bullet.png')
+    brick_image = pygame.image.load('images/block_brick.png')
     bullet_image = pygame.transform.scale(bullet_image, (10, 15))
-    smallfont = pygame.font.SysFont("comicsansms", 25)
-    medfont = pygame.font.SysFont("comicsansms", 50)
-    largefont = pygame.font.SysFont("Yu Mincho Demibold", 85)
-    vsmallfont = pygame.font.SysFont("Yu Mincho Demibold", 25)
+    small_font = pygame.font.SysFont("comicsansms", 25)
+    medium_font = pygame.font.SysFont("comicsansms", 50)
+    large_font = pygame.font.SysFont("Yu Mincho Demibold", 85)
+    smallest_font = pygame.font.SysFont("Yu Mincho Demibold", 25)
 
     FPS = 60
     TILE = 32
 
 
-    def text_objects(text, color, size="small"):
-        if size == "small":
-            text_surface = smallfont.render(text, True, color)
-        if size == "medium":
-            text_surface = medfont.render(text, True, color)
-        if size == "large":
-            text_surface = largefont.render(text, True, color)
-        if size == "vsmall":
-            text_surface = vsmallfont.render(text, True, color)
+    def text_objects(text, color, text_size="small"):
+        if text_size == "small":
+            text_surface = small_font.render(text, True, color)
+        if text_size == "medium":
+            text_surface = medium_font.render(text, True, color)
+        if text_size == "large":
+            text_surface = large_font.render(text, True, color)
+        if text_size == "vsmall":
+            text_surface = smallest_font.render(text, True, color)
 
         return text_surface, text_surface.get_rect()
 
 
-    def message_to_screen(msg, color, y_displace=0, size="small"):
-        textSurf, textRect = text_objects(msg, color, size)
-        textRect.center = (int(width / 2), int(height / 2) + y_displace)
-        screen.blit(textSurf, textRect)
+    def message_to_screen(msg, color, y_displace=0, mes_size="small"):
+        text_surf, text_rect = text_objects(msg, color, mes_size)
+        text_rect.center = (int(width / 2), int(height / 2) + y_displace)
+        screen.blit(text_surf, text_rect)
 
 
-    def text_to_button(msg, color, buttonx, buttony, buttonwidth, buttonheight, size="vsmall"):
-        textSurf, textRect = text_objects(msg, color, size)
-        textRect.center = ((buttonx + (buttonwidth / 2)), buttony + (buttonheight / 2))
-        screen.blit(textSurf, textRect)
+    def text_to_button(msg, color, btn_x, btn_y, btn_width, btn_height, btn_size="vsmall"):
+        text_surf, text_rect = text_objects(msg, color, btn_size)
+        text_rect.center = ((btn_x + (btn_width / 2)), btn_y + (btn_height / 2))
+        screen.blit(text_surf, text_rect)
 
 
-    def button(text, x, y, width, height, inactive_color, active_color, action=None, size=" "):
+    def button(text, x, y, btn_width, btn_height, inactive_color, active_color, action=None):
+        global intro
         cur = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
         # print(click)
-        if x + width > cur[0] > x and y + height > cur[1] > y:
-            pygame.draw.rect(screen, active_color, (x, y, width, height))
+        if x + btn_width > cur[0] > x and y + btn_height > cur[1] > y:
+            pygame.draw.rect(screen, active_color, (x, y, btn_width, btn_height))
             if click[0] == 1 and action is not None:
                 if action == "quit":
                     pygame.quit()
                     quit()
 
                 if action == "controls":
+                    intro = False
                     game_controls()
 
                 if action == "play":
-                    gameLoop()
+                    intro = False
 
                 if action == "main":
                     game_intro()
 
         else:
-            pygame.draw.rect(screen, inactive_color, (x, y, width, height))
+            pygame.draw.rect(screen, inactive_color, (x, y, btn_width, btn_height))
 
-        text_to_button(text, 'black', x, y, width, height)
+        text_to_button(text, 'black', x, y, btn_width, btn_height)
 
 
     def game_intro():
+        global intro
         intro = True
 
         while intro:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_c:
                         intro = False
                     elif event.key == pygame.K_q:
                         pygame.quit()
+                        quit()
             screen.fill('black')
-            message_to_screen("Welcome to TankArcade2D!", 'red', -100, size="large")
+            message_to_screen("Welcome to TankArcade2D!", 'red', -100, mes_size="large")
             message_to_screen("Shoot and destroy the enemy tank", 'yellow', 15)
             message_to_screen("before they destroy you.", 'yellow', 60)
-            button("Play", 150, 500, 100, 50, 'green', 'yellow', action="play", size="vsmall")
-            button("Controls", 350, 500, 100, 50, 'green', 'yellow', action="controls", size="vsmall")
-            button("Quit", 550, 500, 100, 50, 'green', 'yellow', action="quit", size="vsmall")
+            button("Play", 250, 500, 100, 50, 'green', 'yellow', action="play")
+            button("Quit", 450, 500, 100, 50, 'green', 'yellow', action="quit")
             pygame.display.update()
 
 
@@ -120,7 +124,6 @@ if __name__ == '__main__':
             self.bulletDamage = 1
 
         def update(self):
-            old_position = self.position
             if self.angle_speed != 0:
                 # Rotate the direction vector and then the image.
                 self.direction.rotate_ip(self.angle_speed)
@@ -130,6 +133,10 @@ if __name__ == '__main__':
             # Update the position vector and the rect.
             self.position += self.direction * self.speed
             self.rect.center = self.position
+            for obj in objects:
+                if obj != self and obj.type in 'block' and self.rect.colliderect(obj.rect):
+                    self.position += -self.direction * self.speed
+                    self.rect.center = self.position
 
             if self.shot and self.shotTimer == 0:
                 new_position = self.position + self.direction * 10
@@ -139,10 +146,6 @@ if __name__ == '__main__':
 
             if self.shotTimer > 0:
                 self.shotTimer -= 1
-
-            for obj in objects:
-                if obj != self and obj.type in 'block' and self.rect.colliderect(obj.rect):
-                    self.rect.center = old_position
 
         def draw(self):
             screen.blit(self.image, self.rect)
@@ -181,11 +184,45 @@ if __name__ == '__main__':
             screen.blit(self.image, self.rect)
 
 
+    class Block:
+        def __init__(self, px, py, size):
+            objects.append(self)
+            self.type = 'block'
+
+            self.rect = pygame.Rect(px, py, size, size)
+            self.hp = 1
+
+        def update(self):
+            pass
+
+        def draw(self):
+            screen.blit(brick_image, self.rect)
+
+        def damage(self, value):
+            self.hp -= value
+            if self.hp <= 0: objects.remove(self)
+
+
     bullets = []
     objects = []
     player1 = Tank(100, 275, 90, 1)
     player2 = Tank(650, 275, -90, -1)
+    for _ in range(50):
+        while True:
+            x = randint(0, width // TILE - 1) * TILE
+            y = randint(0, height // TILE - 1) * TILE
+            rect = pygame.Rect(x, y, TILE, TILE)
+            fined = False
+            for obj in objects:
+                if rect.colliderect(obj.rect):
+                    fined = True
+
+            if not fined:
+                break
+
+        Block(x, y, TILE)
     running = True
+    game_intro()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -232,9 +269,7 @@ if __name__ == '__main__':
                     player2.speed = 0
                 elif event.key == pygame.K_DOWN:
                     player2.speed = 0
-        game_intro()
-
-
+        screen.fill('black')
         for obj in objects:
             obj.update()
         for bullet in bullets:
