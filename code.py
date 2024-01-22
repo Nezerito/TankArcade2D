@@ -4,16 +4,97 @@ from pygame.math import Vector2
 if __name__ == '__main__':
     pygame.init()
     pygame.display.set_caption('TankArcade2D')
-    size = width, height = 800, 400
+    size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
     screen.fill('black')
     clock = pygame.time.Clock()
+    icon = pygame.image.load('images/icon.png')
+    pygame.display.set_icon(icon)
+
     tank_image = pygame.image.load('images/tank.png')
     bullet_image = pygame.image.load('images/bullet.png')
     bullet_image = pygame.transform.scale(bullet_image, (10, 15))
+    smallfont = pygame.font.SysFont("comicsansms", 25)
+    medfont = pygame.font.SysFont("comicsansms", 50)
+    largefont = pygame.font.SysFont("Yu Mincho Demibold", 85)
+    vsmallfont = pygame.font.SysFont("Yu Mincho Demibold", 25)
 
     FPS = 60
     TILE = 32
+
+
+    def text_objects(text, color, size="small"):
+        if size == "small":
+            text_surface = smallfont.render(text, True, color)
+        if size == "medium":
+            text_surface = medfont.render(text, True, color)
+        if size == "large":
+            text_surface = largefont.render(text, True, color)
+        if size == "vsmall":
+            text_surface = vsmallfont.render(text, True, color)
+
+        return text_surface, text_surface.get_rect()
+
+
+    def message_to_screen(msg, color, y_displace=0, size="small"):
+        textSurf, textRect = text_objects(msg, color, size)
+        textRect.center = (int(width / 2), int(height / 2) + y_displace)
+        screen.blit(textSurf, textRect)
+
+
+    def text_to_button(msg, color, buttonx, buttony, buttonwidth, buttonheight, size="vsmall"):
+        textSurf, textRect = text_objects(msg, color, size)
+        textRect.center = ((buttonx + (buttonwidth / 2)), buttony + (buttonheight / 2))
+        screen.blit(textSurf, textRect)
+
+
+    def button(text, x, y, width, height, inactive_color, active_color, action=None, size=" "):
+        cur = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        # print(click)
+        if x + width > cur[0] > x and y + height > cur[1] > y:
+            pygame.draw.rect(screen, active_color, (x, y, width, height))
+            if click[0] == 1 and action is not None:
+                if action == "quit":
+                    pygame.quit()
+                    quit()
+
+                if action == "controls":
+                    game_controls()
+
+                if action == "play":
+                    gameLoop()
+
+                if action == "main":
+                    game_intro()
+
+        else:
+            pygame.draw.rect(screen, inactive_color, (x, y, width, height))
+
+        text_to_button(text, 'black', x, y, width, height)
+
+
+    def game_intro():
+        intro = True
+
+        while intro:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        intro = False
+                    elif event.key == pygame.K_q:
+                        pygame.quit()
+            screen.fill('black')
+            message_to_screen("Welcome to TankArcade2D!", 'red', -100, size="large")
+            message_to_screen("Shoot and destroy the enemy tank", 'yellow', 15)
+            message_to_screen("before they destroy you.", 'yellow', 60)
+            button("Play", 150, 500, 100, 50, 'green', 'yellow', action="play", size="vsmall")
+            button("Controls", 350, 500, 100, 50, 'green', 'yellow', action="controls", size="vsmall")
+            button("Quit", 550, 500, 100, 50, 'green', 'yellow', action="quit", size="vsmall")
+            pygame.display.update()
 
 
     class Tank:
@@ -112,7 +193,7 @@ if __name__ == '__main__':
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     player1.shot = True
-                if event.key == pygame.K_KP_ENTER:
+                if event.key == pygame.K_RETURN:
                     player2.shot = True
 
                 if event.key == pygame.K_w:
@@ -151,13 +232,14 @@ if __name__ == '__main__':
                     player2.speed = 0
                 elif event.key == pygame.K_DOWN:
                     player2.speed = 0
+        game_intro()
+
 
         for obj in objects:
             obj.update()
         for bullet in bullets:
             bullet.update()
 
-        screen.fill('black')
         for obj in objects:
             obj.draw()
         for bullet in bullets:
