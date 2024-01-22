@@ -12,6 +12,7 @@ if __name__ == '__main__':
     icon = pygame.image.load('images/icon.png')
     pygame.display.set_icon(icon)
 
+    fontUI = pygame.font.Font(None, 30)
     tank_image = pygame.image.load('images/tank.png')
     bullet_image = pygame.image.load('images/bullet.png')
     brick_image = pygame.image.load('images/block_brick.png')
@@ -102,7 +103,8 @@ if __name__ == '__main__':
 
 
     class Tank:
-        def __init__(self, px, py, angle, vector):
+        def __init__(self, color, px, py, angle, vector):
+            self.color = color
             pos = (px, py)
             objects.append(self)
             self.type = 'tank'
@@ -200,13 +202,34 @@ if __name__ == '__main__':
 
         def damage(self, value):
             self.hp -= value
-            if self.hp <= 0: objects.remove(self)
+            if self.hp <= 0:
+                objects.remove(self)
+
+
+    class UI:
+        def __init__(self):
+            pass
+
+        def update(self):
+            pass
+
+        def draw(self):
+            i = 0
+            for obj in objects:
+                if obj.type == 'tank':
+                    pygame.draw.rect(screen, obj.color, (5 + i * 70, 5, 22, 22))
+
+                    text = fontUI.render(str(obj.hp), 1, obj.color)
+                    rect = text.get_rect(center=(5 + i * 70 + 32, 5 + 11))
+                    screen.blit(text, rect)
+                    i += 1
 
 
     bullets = []
     objects = []
-    player1 = Tank(100, 275, 90, 1)
-    player2 = Tank(650, 275, -90, -1)
+    player1 = Tank('blue', 100, 275, 90, 1)
+    player2 = Tank('red', 650, 275, -90, -1)
+    ui = UI()
     for _ in range(50):
         while True:
             x = randint(0, width // TILE - 1) * TILE
@@ -274,11 +297,13 @@ if __name__ == '__main__':
             obj.update()
         for bullet in bullets:
             bullet.update()
+        ui.update()
 
         for obj in objects:
             obj.draw()
         for bullet in bullets:
             bullet.draw()
+        ui.draw()
 
         pygame.display.update()
         clock.tick(FPS)
