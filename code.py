@@ -102,14 +102,15 @@ if __name__ == '__main__':
             message_to_screen("Welcome to TankArcade2D!", 'red', -100, mes_size="large")
             message_to_screen("Shoot and destroy the enemy tank", 'yellow', 15)
             message_to_screen("before they destroy you.", 'yellow', 60)
-            button("Play", 250, 500, 100, 50, 'green', 'yellow', action="play")
-            button("Quit", 450, 500, 100, 50, 'green', 'yellow', action="quit")
+            button("Play", 150, 500, 150, 50, 'green', 'yellow', action="play")
+            button("Controls", 350, 500, 150, 50, 'green', 'yellow', action="controls")
+            button("Quit", 550, 500, 150, 50, 'green', 'yellow', action="quit")
             pygame.display.update()
 
 
     def pause():
         paused = True
-        message_to_screen("Paused", 'white', -100)
+        message_to_screen("Paused", 'white', -100, mes_size="large")
         message_to_screen("Press C to continue playing or Q to quit", 'green', 25)
         pygame.display.update()
         while paused:
@@ -123,6 +124,26 @@ if __name__ == '__main__':
                     elif event.key == pygame.K_q:
                         pygame.quit()
                         quit()
+
+
+    def game_over(player):
+        game_over = True
+
+        while game_over:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+            screen.fill('black')
+            message_to_screen("Game Over", 'green', -100, mes_size="large")
+            message_to_screen(f"{player} wins.", 'green', -30)
+
+            button("Play Again", 150, 500, 150, 50, 'green', 'yellow', action="play")
+            button("Controls", 350, 500, 150, 50, 'green', 'yellow', action="controls")
+            button("Quit", 550, 500, 150, 50, 'green', 'yellow', action="quit")
+
+            pygame.display.update()
 
 
     class Tank:
@@ -350,6 +371,10 @@ if __name__ == '__main__':
             bullet.draw()
         ui.draw()
 
+        if player1.hp <= 0:
+            game_over('Red')
+        elif player2.hp <= 0:
+            game_over('Blue')
         pygame.display.update()
         clock.tick(FPS)
     pygame.quit()
