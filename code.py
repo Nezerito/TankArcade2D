@@ -1,9 +1,9 @@
 import pygame
-from pygame.math import Vector2
+import time
 from random import randint
 
 if __name__ == '__main__':
-    pygame.init()
+    pygame.init() # создание окна
     pygame.display.set_caption('TankArcade2D')
     size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     icon = pygame.image.load('images/icon.png')
     pygame.display.set_icon(icon)
 
-    fontUI = pygame.font.Font(None, 30)
+    fontUI = pygame.font.Font(None, 30) # добавление изображений и шрифтов
     tank_image = pygame.image.load('images/tank.png')
     bullet_image = pygame.image.load('images/bullet.png')
     brick_image = pygame.image.load('images/block_brick.png')
@@ -31,32 +31,32 @@ if __name__ == '__main__':
     TILE = 32
 
 
-    def text_objects(text, color, text_size="small"):
+    def text_objects(text, color, text_size="small"): # использование размеров шрифтов
         if text_size == "small":
             text_surface = small_font.render(text, True, color)
-        if text_size == "medium":
+        elif text_size == "medium":
             text_surface = medium_font.render(text, True, color)
-        if text_size == "large":
+        elif text_size == "large":
             text_surface = large_font.render(text, True, color)
-        if text_size == "vsmall":
+        elif text_size == "smallest":
             text_surface = smallest_font.render(text, True, color)
 
         return text_surface, text_surface.get_rect()
 
 
-    def message_to_screen(msg, color, y_displace=0, mes_size="small"):
+    def message_to_screen(msg, color, y_displace=0, mes_size="small"): # создание сообщений на экране
         text_surf, text_rect = text_objects(msg, color, mes_size)
         text_rect.center = (int(width / 2), int(height / 2) + y_displace)
         screen.blit(text_surf, text_rect)
 
 
-    def text_to_button(msg, color, btn_x, btn_y, btn_width, btn_height, btn_size="vsmall"):
+    def text_to_button(msg, color, btn_x, btn_y, btn_width, btn_height, btn_size="smallest"): # создание текста кнопки
         text_surf, text_rect = text_objects(msg, color, btn_size)
         text_rect.center = ((btn_x + (btn_width / 2)), btn_y + (btn_height / 2))
         screen.blit(text_surf, text_rect)
 
 
-    def button(text, x, y, btn_width, btn_height, inactive_color, active_color, action=None):
+    def button(text, x, y, btn_width, btn_height, inactive_color, active_color, action=None): # создание кнопки
         global intro
         cur = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
@@ -84,7 +84,7 @@ if __name__ == '__main__':
         text_to_button(text, 'black', x, y, btn_width, btn_height)
 
 
-    def game_intro():
+    def game_intro(): # создание начального экрана
         global intro
         intro = True
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
             pygame.display.update()
 
 
-    def pause():
+    def pause(): # создание паузы
         paused = True
         message_to_screen("Paused", 'white', -100, mes_size="large")
         message_to_screen("Press C to continue playing or Q to quit", 'green', 25)
@@ -126,7 +126,7 @@ if __name__ == '__main__':
                         quit()
 
 
-    def game_over(player):
+    def game_over(player): # создание финального окна
         game_over = True
 
         while game_over:
@@ -146,7 +146,7 @@ if __name__ == '__main__':
             pygame.display.update()
 
 
-    class Tank:
+    class Tank: # создание танка
         def __init__(self, color, px, py, angle, vector):
             self.color = color
             pos = (px, py)
@@ -155,14 +155,14 @@ if __name__ == '__main__':
             self.image = pygame.transform.rotate(tank_image, -angle)
             self.original_image = self.image
 
-            self.rect = self.image.get_rect(center=pos)
+            self.rect = self.image.get_rect(center=pos) # переменные движения
             self.position = Vector2(pos)
             self.direction = Vector2(vector, 0)
             self.speed = 0
             self.angle_speed = 0
             self.angle = 0
 
-            self.hp = 5
+            self.hp = 5 # переменные здоровья и выстрелов
             self.shotTimer = 0
             self.shot = False
             self.shotDelay = 60
@@ -179,12 +179,12 @@ if __name__ == '__main__':
             # Update the position vector and the rect.
             self.position += self.direction * self.speed
             self.rect.center = self.position
-            for obj in objects:
+            for obj in objects: # проверка на столкновение и его осуществление
                 if obj != self and obj.type in 'block' and self.rect.colliderect(obj.rect):
                     self.position += -self.direction * self.speed
                     self.rect.center = self.position
 
-            if self.shot and self.shotTimer == 0:
+            if self.shot and self.shotTimer == 0: # осуществление выстрела
                 new_position = self.position + self.direction * 10
                 Bullet(self, new_position, self.direction, self.bulletDamage, self.bulletSpeed, self.angle)
                 self.shotTimer = self.shotDelay
@@ -202,7 +202,7 @@ if __name__ == '__main__':
                 objects.remove(self)
 
 
-    class Bullet:
+    class Bullet: # создание патрона
         def __init__(self, parent, pos, direction, damage, speed, angle):
             bullets.append(self)
             self.image = pygame.transform.rotate(bullet_image, -angle - 90)
