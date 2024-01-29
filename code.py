@@ -373,6 +373,7 @@ if __name__ == '__main__':
 
                 Block(x, y, TILE)
             pygame.mixer.music.load("music.mp3")
+            pygame.mixer.music.set_volume(0.01)
             pygame.mixer.music.play(-1)
             start = False
         for event in pygame.event.get():
