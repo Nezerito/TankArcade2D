@@ -1,7 +1,0 @@
-Winner: 1 player, time: 4, shots: 3
-Winner: 1 player, time: 4, shots: 3
-Winner: 1 player, time: 3, shots: 3
-Winner: 1 player, time: 2, shots: 2
-Winner: 1 player, time: 3, shots: 2
-Winner: 1 player, time: 2, shots: 1
-Winner: 1 player, time: 4, shots: 4
